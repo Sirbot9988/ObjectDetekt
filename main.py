@@ -24,6 +24,8 @@ if not args.get("tracker", False):
 else: 
     tracker = OPENCV_OBJECT_TRACKERS[args["tracker"]]()
 
+faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+
 # Initialize bounding box
 initBB = None
 boxLeftOrRight = None
@@ -52,12 +54,16 @@ while(True):
     mixer.init()
     # Our operations on the frame come here
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
     if initBB is not None: 
         (success, box) = tracker.update(frame)
+        # Faces
+        faces = faceCascade.detectMultiScale(gray, 1.3, 5)
+        for (x, y, w, h) in faces: 
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
         if success: 
             (x, y, w, h) = [int(v) for v in box]
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            
             if W/2 < x: 
                 boxLeftOrRight = "right"
             else: 
